@@ -1,0 +1,1 @@
+pnpx ts-interface-builder (string match -v '*-ti.ts' -- services/*)
