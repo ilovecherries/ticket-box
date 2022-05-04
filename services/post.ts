@@ -5,7 +5,7 @@ const prisma = new PrismaClient();
 export type PostView = {
   id: number,
   content: string,
-  title: string,
+  name: string,
   categoryId: number,
   score: number,
   authorId?: number
@@ -18,7 +18,7 @@ export type PostRestrictedView = {
   id: number,
   content: string,
   categoryId: number,
-  title: string,
+  name: string,
   score: number,
   myScore?: number,
   mine?: boolean,
@@ -30,14 +30,14 @@ export type PostRestrictedView = {
   **/
 export type PostProperties = {
   content: string,
-  title: string,
+  name: string,
   categoryId: number,
   tags?: Array<number>,
 };
 
 export type PostEditProperties = {
   content?: string,
-  title?: string,
+  name?: string,
   categoryId?: number,
   tags?: Array<number>,
 };
@@ -51,7 +51,7 @@ export class PostService {
     let view: PostView = {
       id: post.id,
       content: post.content,
-      title: post.title,
+      name: post.name,
       categoryId: post.categoryId,
       authorId: post.authorId || undefined,
       score: post.votes?.reduce((a, b) => a + b.score, 0) || 0,
@@ -69,7 +69,7 @@ export class PostService {
     let restrictedView: PostRestrictedView = {
       id: view.id,
       content: view.content,
-      title: view.title,
+      name: view.name,
       categoryId: view.categoryId,
       score: view.score,
       tags: view.tags,
@@ -93,7 +93,7 @@ export class PostService {
       }
     }
     const properties = {
-      title: post.title,
+      name: post.name,
       content: post.content,
     };
     const data = await prisma.post.create({
@@ -153,7 +153,7 @@ export class PostService {
       }
     }
     let properties: any = {
-      title: post.title,
+      name: post.name,
       content: post.content,
     };
     if (properties.categoryId) {
@@ -187,7 +187,6 @@ export class PostService {
       where: { id },
       include: { votes: true, PostTagRelationship: true },
     });
-    console.log(result);
     if (result) {
       return admin ? this.toView(result, userId) : this.toRestrictedView(result, userId);
     } else {

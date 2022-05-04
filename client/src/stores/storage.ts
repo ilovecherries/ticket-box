@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
-import type { CategoryView } from "../../../services/category";
-import type { TagView } from "../../../services/tag";
+import type { CategoryView } from "../../../services/category-types";
+import type { TagView } from "../../../services/tag-types";
 
 export type StorageStoreState = {
   categories: CategoryView[];

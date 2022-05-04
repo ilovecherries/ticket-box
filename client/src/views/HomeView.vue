@@ -1,14 +1,14 @@
 <script setup lang="ts">
 import { ref, watch } from "vue";
 import type { PostView, PostProperties } from "../../services/post";
-import type { CategoryView } from "../../services/category";
+import type { CategoryView } from "../../services/category-types";
 import { useIdentityStore } from "../stores/identity";
 import { storeToRefs } from "pinia";
 import Post from "../components/Post.vue";
 import { buildCategoryPath } from "@/utils/categoryTree";
 import { useProgrammatic } from "@oruga-ui/oruga-next";
 import { useStorageStore } from "@/stores/storage";
-import type { TagView } from "../../../services/tag";
+import type { TagView } from "../../../services/tag-types";
 
 const identity = useIdentityStore();
 const storage = useStorageStore();
@@ -31,7 +31,7 @@ const refresh = () => {
 
 const calculateCategorySearch = (text: string) => {
   categoriesSearch.value = categories.value.filter((c) => {
-    return c.title.toString().toLowerCase().indexOf(text.toLowerCase()) >= 0;
+    return c.name.toString().toLowerCase().indexOf(text.toLowerCase()) >= 0;
   });
 };
 
@@ -66,7 +66,7 @@ const recalculateSearch = () => {
   const tagIds = new Set(selectedTags.value.map((x: TagView) => x.id));
   console.log(tagIds);
   const filterPost = (x: PostView) =>
-    (x.title.toLocaleUpperCase().includes(searchQuery) ||
+    (x.name.toLocaleUpperCase().includes(searchQuery) ||
       x.content.toLocaleUpperCase().includes(searchQuery)) &&
     (tagIds.size > 0
       ? x.tags.filter(Set.prototype.has, tagIds).length > 0
@@ -89,7 +89,7 @@ watch([posts, query], recalculateSearch, { deep: true });
 watch(selectedTags, recalculateSearch, { deep: true });
 
 const samplePost: PostProperties = {
-  title: "My Post",
+  name: "My Post",
   content: "My Post Content",
   tags: [5],
   categoryId: 152,
@@ -137,7 +137,7 @@ const createPost = async () => {
         :open-on-focus="true"
         :data="categoriesSearch"
         @typing="calculateCategorySearch"
-        field="title"
+        field="name"
       ></o-autocomplete>
     </o-field>
     <o-field label="Search Posts" rootClass="w-full md:grow">
@@ -175,7 +175,7 @@ const createPost = async () => {
         :category-path="categories ? buildCategoryPath(
           categories,
           categories.find(x => x.id === p.categoryId)!.id
-        )?.map((x: CategoryView) => x.title) || [] : []"
+        )?.map((x: CategoryView) => x.name) || [] : []"
       />
     </div>
   </div>

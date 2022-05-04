@@ -1,7 +1,7 @@
 import { PostProperties, PostService } from "../services/post";
 import postTI from "../services/post-ti";
-import categoryTI from "../services/category-ti";
-import tagTI from "../services/tag-ti";
+import categoryTI from "../services/category-types-ti";
+import tagTI from "../services/tag-types-ti";
 import request from "supertest";
 import { createCheckers } from "ts-interface-checker";
 import server from "../index";
@@ -10,6 +10,7 @@ import { UserService } from "../services/user";
 import { CategoryService } from "../services/category";
 import { VoteProperties } from "../services/vote";
 import { TagService } from "../services/tag";
+import { prisma } from "@prisma/client";
 
 const userService = new UserService();
 const categoryService = new CategoryService();
@@ -210,11 +211,11 @@ describe("categories related tests", () => {
       .expect(expected, callback);
   }
 
-  const title = "My Category";
-  const sampleCategory = { title };
+  const name = "My Category";
+  const sampleCategory = { name };
 
-  const title2 = "My Next Category";
-  const sampleEdit = { title: title2 };
+  const name2 = "My Next Category";
+  const sampleEdit = { name: name2 };
 
   test("failing to create a category while not signed in", (done) =>
     createCategory("", sampleCategory, done, 401));
@@ -339,12 +340,16 @@ describe("tags related tests", () => {
       .expect(expected, callback);
   }
 
-  describe("creating a post", () => {
-    afterAll(async () => {
+  describe("creating a tag", () => {
+    const deleteTags = async () => {
       try {
         await tagService.deleteByName(name);
+        await tagService.deleteByName(name2);
       } catch (_) {}
-    })
+    }
+
+    beforeAll(deleteTags)
+    afterAll(deleteTags)
 
     test("failing to create a tag while not signed in", (done) =>
       createTag("", sampleTag, done, 401));
@@ -418,13 +423,13 @@ describe("posts related tests", () => {
   const path = "/api/v1/posts";
 
   const content = "Hello, World!";
-  const title = "Hello, World!";
+  const name = "Hello, World!";
   
   const tag1 = "My Epic Tag";
   const tag2 = "My Very Epic Tag";
 
   let samplePost: PostProperties = {
-    content, title,
+    content, name,
     categoryId: 0,
   };
 
@@ -476,10 +481,10 @@ describe("posts related tests", () => {
       // create category to use for testing
       const res = await app.post(categoryPath)
         .set('Authorization', `Bearer ${admin_token}`)
-        .send({ title: "My First Category" });
+        .send({ name: "My First Category" });
       const res2 = await app.post(categoryPath)
         .set('Authorization', `Bearer ${admin_token}`)
-        .send({ title: "My Second Category", parentId: res.body.id });
+        .send({ name: "My Second Category", parentId: res.body.id });
       const res3 = await app.post(tagPath)
         .set('Authorization', `Bearer ${admin_token}`)
         .send({ name: tag1 });
@@ -490,7 +495,6 @@ describe("posts related tests", () => {
       tagId = res3.body.id;
       tag2Id = res4.body.id;
       samplePost.categoryId = res2.body.id;
-      console.log("END OF BEFORE ALL", samplePost)
     });
 
     afterAll(async () => {
@@ -508,7 +512,7 @@ describe("posts related tests", () => {
       createPost(token, samplePost, done));
     
     test("failing to create post with missing credentials", (done) =>
-      createPost(token, { title }, done, 400));
+      createPost(token, { name }, done, 400));
 
     test("creating post with a tag that exists", (done) =>
       createPost(token, { ...samplePost, tags: [tagId] }, (err, res) => {
@@ -603,10 +607,10 @@ describe("posts related tests", () => {
         });
     });
 
-    const title2 = "Goodbye, Martha";
+    const name2 = "Goodbye, Martha";
     const content2 = "Adios, Rarity";
     const sampleEdit = {
-      title: title2, content: content2,
+      name: name2, content: content2,
     }
 
     const editPost = (
@@ -635,7 +639,6 @@ describe("posts related tests", () => {
           if (err) return done(err);
           editPost(token, res.body.id, {...sampleEdit, tags: [tag2Id]}, (err, res2) => {
             if (err) return done(err);
-            console.log(res.body.tags, res2.body.tags)
             if (res.body.tags[0] === res2.body.tags[0]) {
               return done("The tags weren't changed in any way");
             }
@@ -728,11 +731,11 @@ describe("voting related tests", () => {
     // create post to use for testing votes on
     const res = await app.post(categoryPath)
       .set('Authorization', `Bearer ${token}`)
-      .send({ title: "My First Category" });
+      .send({ name: "My First Category" });
     categoryId = res.body.id; 
     const post_data: PostProperties = {
       categoryId: res.body.id,
-      title: "My Testing Post",
+      name: "My Testing Post",
       content: "XD",
     };
     const res2 = await app.post(postPath)

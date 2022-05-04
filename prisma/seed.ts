@@ -5,7 +5,7 @@ const prisma = new PrismaClient();
 (async () => {
 	await prisma.category.create({
 		data: {
-			title: "Root Category",
+			name: "Root Category",
 		},
 	});
 	await prisma.tag.create({

@@ -9,7 +9,7 @@ datasource db {
 
 model Category {
   id       Int        @id @default(autoincrement())
-  title    String
+  name    String
   parent   Category?  @relation(name: "NestedCategories", fields: [parentId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   parentId Int?
   children Category[] @relation(name: "NestedCategories")
@@ -18,7 +18,7 @@ model Category {
 
 model Post {
   id                  Int                   @id @default(autoincrement())
-  title               String
+  name               String
   content             String
   author              User?                 @relation(fields: [authorId], references: [id], onDelete: SetNull, onUpdate: Cascade)
   authorId            Int?

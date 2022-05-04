@@ -1,69 +1,60 @@
 import { PrismaClient, Tag } from "@prisma/client";
+import { IItemService } from "./IItemService";
+import { TagView, TagProperties, TagEditProperties, toView } from "./tag-types";
 
 const prisma = new PrismaClient();
 
-export type TagView = {
-  id: number,
-  name: string,
-};
+export class TagService implements IItemService<
+	TagView,
+	TagProperties,
+	TagEditProperties
+> {
+	private readonly toView: (props: Tag) => TagView
 
-export type TagProperties = {
-  name: string,
-};
+	constructor() {
+		this.toView = toView;
+	}
 
-export type TagEditProperties = {
-  name?: string,
-};
+	async create(props: TagProperties): Promise<TagView> {
+		const data: any = { ...props };
+		const item = await prisma.tag.create({ data });
+		return this.toView(item);
+	}
 
-export class TagService {
-  private toView(tag: Tag): TagView {
-    const view: TagView = {
-      id: tag.id,
-      name: tag.name,
-    }
-    return view;
-  }
+	async edit(id: number, props: TagEditProperties): Promise<TagView> {
+		const data: any = { ...props };
+		const item = await prisma.tag.update({
+			where: { id },
+			data,
+		});
+		return this.toView(item);
+	}
 
-  async create(tag: TagProperties): Promise<TagView> {
-    let data: any = { ...tag };
-    const created = await prisma.tag.create({ data });
-    return this.toView(created);
-  }
+	async delete(id: number) {
+		await prisma.tag.delete({
+			where: { id },
+		});
+	}
 
-  async edit(id: number, tag: TagEditProperties): Promise<TagView> {
-    let data: any = { ...tag };
-    const created = await prisma.tag.update({
-      where: { id },
-      data
-    });
-    return this.toView(created);
-  }
+	async deleteByName(name: string) {
+		await prisma.tag.delete({
+			where: { name },
+		});
+	}
 
-  async delete(id: number) {
-    await prisma.tag.delete({
-      where: { id },
-    });
-  }
+	async getAll(): Promise<TagView[]> {
+		const items = await prisma.tag.findMany();
+		return items.map(this.toView);
+	}
 
-  async deleteByName(name: string) {
-    await prisma.tag.delete({
-      where: { name },
-    });
-  }
-
-  async getAll(): Promise<TagView[]> {
-    const categories = await prisma.tag.findMany();
-    return categories.map(this.toView);
-  }
-
-  async getOne(id: number): Promise<Tag> {
-    const data = await prisma.tag.findUnique({
-      where: { id }
-    });
-    if (data) {
-      return this.toView(data);
-    } else {
-      throw new Error("Tag not found.");
-    }
-  }
+	async getOne(id: number): Promise<TagView> {
+		const data = await prisma.tag.findUnique({
+			where: { id },
+		});
+		if (data) {
+			return this.toView(data);
+		} else {
+			throw new Error("Tag was not found.");
+		}
+	}
 }

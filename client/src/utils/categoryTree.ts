@@ -1,4 +1,4 @@
-import type { CategoryView } from "../../../services/category";
+import type { CategoryView } from "../../../services/category-types";
 
 export type CategoryViewWithChildren = CategoryView & {
   children: CategoryViewWithChildren[];

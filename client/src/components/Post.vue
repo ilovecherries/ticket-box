@@ -120,7 +120,7 @@ const deletePost = async () => {
 };
 
 const samplePost = {
-  title: "My Edited Post",
+  name: "My Edited Post",
   content: "My Edited Post Content",
   tags: [4],
 };
@@ -173,7 +173,7 @@ const editPost = async () => {
   <div class="flex border shadow-sm border-[#dbdbdb] p-3 m-2 rounded">
     <div class="grow">
       <div class="flex">
-        <h4 class="d-inline-block m-0 text-lg">{{ props.post.title }}</h4>
+        <h4 class="d-inline-block m-0 text-lg">{{ props.post.name }}</h4>
         <span class="text-xs text-gray-400 align-bottom mx-1"
           >(id: {{ props.post.id }})</span
         >
