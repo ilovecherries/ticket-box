@@ -1,15 +1,34 @@
-import { fileURLToPath, URL } from "url";
+/// <reference types="vitest" />
+/// <reference types="vite/client" />
 
-import { defineConfig } from "vite";
-import vue from "@vitejs/plugin-vue";
+import { defineConfig } from 'vite';
+import solidPlugin from 'vite-plugin-solid';
 
-// https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [vue()],
-  resolve: {
-    alias: {
-      "@": fileURLToPath(new URL("./src", import.meta.url)),
+  plugins: [solidPlugin()],
+  test: {
+    environment: 'jsdom',
+    globals: true,
+    transformMode: {
+      web: [/\.[jt]sx?$/],
     },
+    setupFiles: './setupVitest.ts',
+    // solid needs to be inline to work around
+    // a resolution issue in vitest:
+    deps: {
+      inline: [/solid-js/],
+    },
+    // if you have few tests, try commenting one
+    // or both out to improve performance:
+    threads: false,
+    isolate: false,
+  },
+  build: {
+    target: 'esnext',
+    polyfillDynamicImport: false,
+  },
+  resolve: {
+    conditions: ['development', 'browser'],
   },
   server: {
     proxy: {
@@ -20,5 +39,5 @@ export default defineConfig({
         ws: true,
       },
     },
-  }
+  },
 });

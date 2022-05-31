@@ -89,10 +89,10 @@ watch([posts, query], recalculateSearch, { deep: true });
 watch(selectedTags, recalculateSearch, { deep: true });
 
 const samplePost: PostProperties = {
-  name: "My Post",
-  content: "My Post Content",
-  tags: [5],
-  categoryId: 152,
+  name: "Testing",
+  content: "Hi!",
+  tags: [],
+  categoryId: 493,
 };
 
 const createPost = async () => {

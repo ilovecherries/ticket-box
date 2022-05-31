@@ -10,12 +10,17 @@ const prisma = new PrismaClient();
 	});
 	await prisma.tag.create({
 		data: {
-			name: "pinkie-pie",
+			name: "cs101",
 		},
 	});
 	await prisma.tag.create({
 		data: {
-			name: "starlight-glimmer",
+			name: "h240",
+		},
+	});
+	await prisma.tag.create({
+		data: {
+			name: "urgent",
 		},
 	});
 })()
