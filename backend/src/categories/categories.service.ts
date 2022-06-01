@@ -18,7 +18,7 @@ export class CategoryProperties {
 
 @Injectable()
 export class CategoriesService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) { }
 
   toDto(category: Category): CategoryDto {
     const dto: CategoryDto = {

@@ -6,10 +6,12 @@ import { UsersModule } from './users/users.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { PostsModule } from './posts/posts.module';
 import { CategoriesModule } from './categories/categories.module';
+import { TagsService } from './tags/tags.service';
+import { TagsModule } from './tags/tags.module';
 
 @Module({
-  imports: [AuthModule, UsersModule, PrismaModule, PostsModule, CategoriesModule],
+  imports: [AuthModule, UsersModule, PrismaModule, PostsModule, CategoriesModule, TagsModule],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, TagsService],
 })
 export class AppModule {}

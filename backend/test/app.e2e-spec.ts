@@ -19,6 +19,7 @@ import {
   PostRestrictedDto,
   PostsService,
 } from './../src/posts/posts.service';
+import { TagProperties, TagsService } from './../src/tags/tags.service';
 
 const SAMPLE_USERNAME = 'Quandale';
 const SAMPLE_USERNAME_2 = 'Dimmadome';
@@ -29,6 +30,7 @@ const prismaService = new PrismaService();
 const usersService = new UsersService(prismaService);
 
 const categoriesService = new CategoriesService(prismaService);
+const tagsService = new TagsService(prismaService);
 const postsService = new PostsService(prismaService);
 const jwtService = new JwtService({
   secret: jwtConstants.secret,
@@ -53,18 +55,18 @@ const createItem = async <T extends IItem, U>(
   if (id)
     try {
       await service.delete(id);
-    } catch (e) {}
+    } catch (e) { }
   if (id)
     try {
       await service.delete(id);
-    } catch (e) {}
+    } catch (e) { }
   return await service.create(data);
 };
 
 const deleteUser = async (username = SAMPLE_USERNAME) => {
   try {
     await usersService.deleteByUsername(username);
-  } catch (e) {}
+  } catch (e) { }
 };
 
 const createUser = async (username = SAMPLE_USERNAME): Promise<User> => {
@@ -294,7 +296,7 @@ describe('AppController (e2e)', () => {
       afterEach(async () => {
         try {
           await categoriesService.delete(id);
-        } catch (e) {}
+        } catch (e) { }
       });
 
       it('Fail to edit a category while not signed in', () => {
@@ -320,7 +322,7 @@ describe('AppController (e2e)', () => {
       beforeEach(async () => {
         try {
           await categoriesService.delete(id);
-        } catch (e) {}
+        } catch (e) { }
         const category = await categoriesService.create(SAMPLE_CATEGORY);
         id = category.id;
       });
@@ -328,7 +330,7 @@ describe('AppController (e2e)', () => {
       afterEach(async () => {
         try {
           await categoriesService.delete(id);
-        } catch (e) {}
+        } catch (e) { }
       });
 
       it('Fail to delete a category while not signed in', () => {
@@ -341,6 +343,107 @@ describe('AppController (e2e)', () => {
 
       it('Delete a category while signed in as an admin', () => {
         return deleteCategory(id, admin_token);
+      });
+    });
+  });
+
+  describe('/v1/tags (Tags)', () => {
+    const PATH = '/v1/tags';
+
+    const SAMPLE_NAME = 'My Tag';
+    const SAMPLE_NAME_2 = 'My Edited Tag';
+    const SAMPLE_TAG: TagProperties = { name: SAMPLE_NAME };
+    const SAMPLE_TAG_2: TagProperties = { name: SAMPLE_NAME_2 };
+
+    let token = '',
+      admin_token = '';
+
+    beforeAll(async () => {
+      const { normal, admin } = await createUsers();
+      token = loginUser(normal).access_token;
+      admin_token = loginUser(admin).access_token;
+    });
+
+    afterAll(deleteUsers);
+
+    const createTag = postFactory<TagProperties>(PATH);
+
+    it('Fail to create a tag while not signed in', () => {
+      return createTag(SAMPLE_TAG, '', 401);
+    });
+
+    it('Fail to create a tag while signed in as a normal user', () => {
+      return createTag(SAMPLE_TAG, token, 403);
+    });
+
+    it('Create a tag while signed in as an admin', () => {
+      return createTag(SAMPLE_TAG, admin_token);
+    });
+
+    it('Fail to create a tag with missing credentials', () => {
+      return createTag({}, admin_token, 400);
+    });
+
+    describe('Editing tags', () => {
+      let id = 0;
+
+      const editTag = putFactory<TagProperties>(PATH);
+
+      beforeEach(async () => {
+        const tag = await createItem(tagsService, SAMPLE_TAG, id);
+        id = tag.id;
+      });
+
+      afterEach(async () => {
+        try {
+          await tagsService.delete(id);
+        } catch (e) { }
+      });
+
+      it('Fail to edit a category while not signed in', () => {
+        return editTag(id, SAMPLE_TAG_2, '', 401);
+      });
+
+      it('Fail to edit a category while signed in as a normal user', () => {
+        return editTag(id, SAMPLE_TAG_2, token, 403);
+      });
+
+      it('Edit a category while signed in as an admin', () => {
+        return editTag(id, SAMPLE_TAG_2, admin_token).expect(
+          (c: CategoryDto) => c.name === SAMPLE_TAG_2.name,
+        );
+      });
+    });
+
+    describe('Deleting tags', () => {
+      let id = 0;
+
+      const deleteTag = deleteFactory(PATH);
+
+      beforeEach(async () => {
+        try {
+          await tagsService.delete(id);
+        } catch (e) { }
+        const tag = await tagsService.create(SAMPLE_TAG);
+        id = tag.id;
+      });
+
+      afterEach(async () => {
+        try {
+          await tagsService.delete(id);
+        } catch (e) { }
+      });
+
+      it('Fail to delete a tag while not signed in', () => {
+        return deleteTag(id, '', 401);
+      });
+
+      it('Fail to delete a tag while signed in as a normal user', () => {
+        return deleteTag(id, token, 403);
+      });
+
+      it('Delete a tag while signed in as an admin', () => {
+        return deleteTag(id, admin_token);
       });
     });
   });
@@ -415,7 +518,7 @@ describe('AppController (e2e)', () => {
       beforeEach(async () => {
         try {
           await postsService.delete(id);
-        } catch (e) {}
+        } catch (e) { }
         const post = await postsService.create(POST_DATA(), normal);
         id = post.id;
       });
@@ -423,7 +526,7 @@ describe('AppController (e2e)', () => {
       afterEach(async () => {
         try {
           await postsService.delete(id);
-        } catch (e) {}
+        } catch (e) { }
       });
 
       it('Check if "mine" and "myScore" properties are missing when not signed in', () => {
@@ -466,7 +569,7 @@ describe('AppController (e2e)', () => {
       beforeEach(async () => {
         try {
           await postsService.delete(id);
-        } catch (e) {}
+        } catch (e) { }
         const post = await postsService.create(POST_DATA(), normal);
         id = post.id;
       });
@@ -474,7 +577,7 @@ describe('AppController (e2e)', () => {
       afterEach(async () => {
         try {
           await postsService.delete(id);
-        } catch (e) {}
+        } catch (e) { }
       });
 
       it('Fail to edit a post while not signed in', () => {
@@ -506,7 +609,7 @@ describe('AppController (e2e)', () => {
       beforeEach(async () => {
         try {
           await postsService.delete(id);
-        } catch (e) {}
+        } catch (e) { }
         const post = await postsService.create(POST_DATA(), normal);
         id = post.id;
       });
@@ -514,7 +617,7 @@ describe('AppController (e2e)', () => {
       afterEach(async () => {
         try {
           await postsService.delete(id);
-        } catch (e) {}
+        } catch (e) { }
       });
 
       it('Fail to delete a post while not signed in', () => {

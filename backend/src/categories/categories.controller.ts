@@ -30,7 +30,7 @@ export class CategoriesController {
   constructor(
     private readonly categoriesService: CategoriesService,
     private readonly usersService: UsersService,
-  ) {}
+  ) { }
 
   @Get()
   async getAll(): Promise<CategoryDto[]> {

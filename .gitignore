@@ -2,5 +2,6 @@ node_modules
 # Keep environment variables out of version control
 .env
 services/*-ti.ts
-prisma/save.db*
+save.db
 services/.pnpm-debug.log
+.DS_Store
